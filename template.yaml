@@ -106,3 +106,9 @@ Resources:
           - !Ref SubnetC
         SecurityGroupIds:
           - !Ref ElasticsearchSecurityGroup
+
+Outputs:
+  ElasticSearchDomainArn:
+    Value: !GetAtt ElasticSearch.DomainArn
+  ElasticSearchDomainEndpoint:
+    Value: !GetAtt ElasticSearch.DomainEndpoint
