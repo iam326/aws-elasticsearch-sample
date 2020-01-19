@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Elasticsearch Sample
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: '10.1.0.0/16'
+
+  SubnetACidr:
+    Type: String
+    Default: '10.1.10.0/24'
+
+  SubnetCCidr:
+    Type: String
+    Default: '10.1.20.0/24'
+
+  ESDomainName:
+    Description: 'Your Elasticsearch Domain Name'
+    Type: String
+    MinLength: 3
+    MaxLength: 28
+    AllowedPattern: '^[a-z0-9+-]*$'
+    Default: elasticsearch-sample-domain
+
+Resources:
+  # 他のテンプレートでも作成しようとするとエラーになるので注意
+  EsServiceLinkedRole:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    Properties:
+      AWSServiceName: es.amazonaws.com
+      Description: 'Service Linked Role for Amazon Elasticsearch Service'
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: Elasticsearch-Sample-Vpc
+
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref SubnetACidr
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: ap-northeast-1a
+      Tags:
+        - Key: Name
+          Value: Elasticsearch-Sample-Subnet-A
+
+  SubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref SubnetCCidr
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: ap-northeast-1c
+      Tags:
+        - Key: Name
+          Value: Elasticsearch-Sample-Subnet-C
+
+  ElasticsearchSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: elasticsearch-sg
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: elasticsearch-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: !GetAtt VPC.CidrBlock
+
+  ElasticSearch:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action: 'es:*'
+            Resource: !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/*'
+      DomainName: !Ref ESDomainName
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: gp2
+      ElasticsearchClusterConfig:
+        InstanceCount: 2 # Subnetの数以上に設定する必要がある
+        InstanceType: t2.small.elasticsearch # t2.micro.es は、ES1.5or2.3 のみサポート
+        ZoneAwarenessEnabled: true
+      ElasticsearchVersion: 6.2
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: 17
+      VPCOptions:
+        SubnetIds:
+          - !Ref SubnetA
+          - !Ref SubnetC
+        SecurityGroupIds:
+          - !Ref ElasticsearchSecurityGroup
+
+Outputs:
+  ElasticSearchDomainArn:
+    Value: !GetAtt ElasticSearch.DomainArn
+  ElasticSearchDomainEndpoint:
+    Value: !GetAtt ElasticSearch.DomainEndpoint
