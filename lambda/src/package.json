@@ -8,11 +8,11 @@
   "devDependencies": {
     "@types/elasticsearch": "^5.0.36",
     "@types/node": "^13.1.7",
+    "aws-sdk": "2.488.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "aws-sdk": "^2.605.0",
     "elasticsearch": "^16.6.0",
     "http-aws-es": "^6.0.0"
   }
