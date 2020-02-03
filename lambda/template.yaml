@@ -23,6 +23,4 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs10.x
-      Code:
-        S3Bucket: iam326.aws-elasticsearch-sample
-        S3Key: src.zip
+      Code: src/dist/
