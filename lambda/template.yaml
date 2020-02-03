@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Elasticsearch Sample
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: operate Elasticsearch
+      FunctionName: ElasticsearchSampleLambdaFunction
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: nodejs10.x
+      Code:
+        S3Bucket: iam326.aws-elasticsearch-sample
+        S3Key: src.zip
