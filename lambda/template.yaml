@@ -41,6 +41,8 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs10.x
       Code: src/dist/
+      Timeout: 30
+      MemorySize: 256
 
 Outputs:
   LambdaExecutionRoleArn:
