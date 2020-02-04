@@ -17,8 +17,20 @@ Resources:
             Principal:
               Service:
                 - 'lambda.amazonaws.com'
+                - 'es.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - 'cloudformation:*'
+              - 'es:*'
+            Resource: '*'
 
   LambdaFunction:
     Type: AWS::Lambda::Function
