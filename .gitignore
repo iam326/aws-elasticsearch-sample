@@ -1,1 +1,5 @@
 node_modules/
+dist/
+nodejs/
+index.js
+layer.zip
