@@ -1,6 +1,9 @@
 'use strict';
 
-const AWS = require('aws-sdk');
+import AWS from 'aws-sdk';
+import { Client } from '@elastic/elasticsearch';
+const AmazonConnection = require('aws-elasticsearch-connector').AmazonConnection;
+
 AWS.config.update({region: 'ap-northeast-1'});
 
 const cfn = new AWS.CloudFormation();
@@ -17,7 +20,7 @@ function getESDomainEndpoint(stackName: string, outputKeyName: string): Promise<
       const outputs = data.Stacks[0].Outputs;
       for (const output of outputs) {
         if (output.OutputKey === outputKeyName) {
-          resolve(output.OutputValue);
+          resolve(`https://${output.OutputValue}`);
         }
       }
       reject('not found');
@@ -25,11 +28,11 @@ function getESDomainEndpoint(stackName: string, outputKeyName: string): Promise<
   });
 }
 
-function connectElasticsearch(host: string) {
-  return require('elasticsearch').Client({
-    hosts: [host],
-    connectionClass: require('http-aws-es')
-  });
+function connectElasticsearch(node: string) {
+  return new Client({
+    node,
+    Connection: AmazonConnection,
+  } as any);
 }
 
 exports.handler = async (event: any, context: any, callback: Function) => {
@@ -38,18 +41,19 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   const endpoint = await getESDomainEndpoint(stackName, outputKeyName);
   const es = connectElasticsearch(endpoint);
 
-  try {
-    es.index({
-      index: "_sample",
-      body: {
-        title: 'foo',
-        description: 'bar'
-      }
-    });
-    console.log('success!');
-  } catch (e) {
-    console.log(e);
-  }
+  es.create({
+    index: 'sample-index',
+    type: 'sample-type',
+    id: '1',
+    body: {
+      title: 'service name',
+      description: 'hogehoge'
+    }
+  }).then(function (body) {
+    console.log(body)
+  }, function (error) {
+    console.trace(error.message)
+  })
 
   return callback(null, 'Success!');
 }

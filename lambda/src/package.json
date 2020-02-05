@@ -13,7 +13,8 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "elasticsearch": "^16.6.0",
+    "@elastic/elasticsearch": "^7.5.1",
+    "aws-elasticsearch-connector": "^8.2.0",
     "http-aws-es": "^6.0.0"
   }
 }
