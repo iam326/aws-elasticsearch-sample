@@ -5,6 +5,8 @@ Parameters:
   NamePrefix:
     Type: String
     Default: aws-elasticsearch-sample
+  BucketName:
+    Type: String
 
 Resources:
   LambdaExecutionRole:
@@ -31,6 +33,17 @@ Resources:
                 - 'es:*'
               Resource: '*'
 
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes: 
+        - nodejs10.x
+      Content: 
+        S3Bucket: !Ref BucketName
+        S3Key: layer.zip
+      Description: sample lambda layer
+      LayerName: ElasticsearchSampleLambdaLayer
+
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -42,6 +55,8 @@ Resources:
       Code: src/dist/
       Timeout: 30
       MemorySize: 256
+      Layers:
+        - !Ref LambdaLayer
 
 Outputs:
   LambdaExecutionRoleArn:
