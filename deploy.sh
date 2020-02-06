@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly PROJECT_NAME="aws-elasticsearch-sample"
-readonly STACK_NAME="${PROJECT_NAME}-stack"
+readonly STACK_NAME="${PROJECT_NAME}-es"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
 
 aws cloudformation validate-template \
