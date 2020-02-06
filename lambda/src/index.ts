@@ -6,41 +6,22 @@ const AmazonConnection = require('aws-elasticsearch-connector').AmazonConnection
 
 AWS.config.update({region: 'ap-northeast-1'});
 
-const cfn = new AWS.CloudFormation();
+function connectElasticsearch() {
+  const env_name = process.env.ENV_NAME;
+  const endpoint = process.env.ES_ENDPOINT;
+  if (!env_name || !endpoint) {
+    throw 'error';
+  }
 
-function getESDomainEndpoint(stackName: string, outputKeyName: string): Promise<string> {
-  return new Promise((resolve, reject)=> {
-    const params = {
-      StackName: stackName
-    };
-    cfn.describeStacks(params, function(err: any, data: any) {
-      if (err) {
-        reject(err);
-      }
-      const outputs = data.Stacks[0].Outputs;
-      for (const output of outputs) {
-        if (output.OutputKey === outputKeyName) {
-          resolve(`https://${output.OutputValue}`);
-        }
-      }
-      reject('not found');
-    });
-  });
-}
-
-function connectElasticsearch(node: string) {
-  return new Client({
-    node,
-    Connection: AmazonConnection,
-  } as any);
+  let params: any = { node: endpoint };
+  if (env_name === 'aws') {
+    params.Connection = AmazonConnection;
+  }
+  return new Client(params);
 }
 
 exports.handler = async (event: any, context: any, callback: Function) => {
-  const stackName = 'aws-elasticsearch-sample-stack';
-  const outputKeyName = 'ElasticSearchDomainEndpoint';
-  const endpoint = await getESDomainEndpoint(stackName, outputKeyName);
-  const es = connectElasticsearch(endpoint);
-
+  const es = connectElasticsearch();
   es.create({
     index: 'sample-index',
     type: 'sample-type',
