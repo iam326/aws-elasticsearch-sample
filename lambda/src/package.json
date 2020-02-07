@@ -6,7 +6,6 @@
   "author": "t.takahashi <takahashi.developer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "es-local": "docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e 'discovery.type=single-node' elasticsearch:7.1.1"
   },
   "devDependencies": {
     "@types/elasticsearch": "^5.0.36",
