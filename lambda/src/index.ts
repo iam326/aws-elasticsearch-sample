@@ -22,19 +22,50 @@ function connectElasticsearch() {
 
 exports.handler = async (event: any, context: any, callback: Function) => {
   const es = connectElasticsearch();
-  es.create({
-    index: 'sample-index',
-    type: 'sample-type',
-    id: '1',
+  const index = 'todo';
+
+  const result = await es.cat.indices();
+  console.log(result.body);
+
+  const exists = await es.indices.exists({ index })
+  if (exists.body) {
+    await es.indices.delete({ index });
+  }
+
+  await es.index({
+    index,
     body: {
-      title: 'service name',
-      description: 'hogehoge'
+      title: 'Sample Title 1',
+      body: 'hoge fuga'
     }
-  }).then(function (body) {
-    console.log(body)
-  }, function (error) {
-    console.trace(error.message)
   })
 
-  return callback(null, 'Success!');
+  await es.index({
+    index,
+    body: {
+      title: 'Sample Title 2',
+      body: 'foo bar'
+    }
+  })
+
+  await es.index({
+    index,
+    body: {
+      title: 'Sample Title 3',
+      body: 'hoge foo bar'
+    }
+  })
+
+  await es.indices.refresh({ index })
+
+  const { body } = await es.search({
+    index,
+    body: {
+      query: {
+        match: { body: 'hoge' }
+      }
+    }
+  });
+
+  return callback(null, body.hits.hits);
 }
