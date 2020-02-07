@@ -42,7 +42,7 @@ Resources:
       ElasticsearchClusterConfig:
         InstanceCount: 1
         InstanceType: t2.small.elasticsearch # t2.micro.es は、ES1.5or2.3 のみサポート
-      ElasticsearchVersion: 6.2
+      ElasticsearchVersion: 7.1
 
 Outputs:
   ElasticSearchDomainArn:

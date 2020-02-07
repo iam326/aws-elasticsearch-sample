@@ -6,54 +6,66 @@ const AmazonConnection = require('aws-elasticsearch-connector').AmazonConnection
 
 AWS.config.update({region: 'ap-northeast-1'});
 
-const cfn = new AWS.CloudFormation();
+function connectElasticsearch() {
+  const env_name = process.env.ENV_NAME;
+  const endpoint = process.env.ES_ENDPOINT;
+  if (!env_name || !endpoint) {
+    throw 'error';
+  }
 
-function getESDomainEndpoint(stackName: string, outputKeyName: string): Promise<string> {
-  return new Promise((resolve, reject)=> {
-    const params = {
-      StackName: stackName
-    };
-    cfn.describeStacks(params, function(err: any, data: any) {
-      if (err) {
-        reject(err);
-      }
-      const outputs = data.Stacks[0].Outputs;
-      for (const output of outputs) {
-        if (output.OutputKey === outputKeyName) {
-          resolve(`https://${output.OutputValue}`);
-        }
-      }
-      reject('not found');
-    });
-  });
-}
-
-function connectElasticsearch(node: string) {
-  return new Client({
-    node,
-    Connection: AmazonConnection,
-  } as any);
+  let params: any = { node: endpoint };
+  if (env_name === 'aws') {
+    params.Connection = AmazonConnection;
+  }
+  return new Client(params);
 }
 
 exports.handler = async (event: any, context: any, callback: Function) => {
-  const stackName = 'aws-elasticsearch-sample-stack';
-  const outputKeyName = 'ElasticSearchDomainEndpoint';
-  const endpoint = await getESDomainEndpoint(stackName, outputKeyName);
-  const es = connectElasticsearch(endpoint);
+  const es = connectElasticsearch();
+  const index = 'todo';
 
-  es.create({
-    index: 'sample-index',
-    type: 'sample-type',
-    id: '1',
+  const result = await es.cat.indices();
+  console.log(result.body);
+
+  const exists = await es.indices.exists({ index })
+  if (exists.body) {
+    await es.indices.delete({ index });
+  }
+
+  await es.index({
+    index,
     body: {
-      title: 'service name',
-      description: 'hogehoge'
+      title: 'Sample Title 1',
+      body: 'hoge fuga'
     }
-  }).then(function (body) {
-    console.log(body)
-  }, function (error) {
-    console.trace(error.message)
   })
 
-  return callback(null, 'Success!');
+  await es.index({
+    index,
+    body: {
+      title: 'Sample Title 2',
+      body: 'foo bar'
+    }
+  })
+
+  await es.index({
+    index,
+    body: {
+      title: 'Sample Title 3',
+      body: 'hoge foo bar'
+    }
+  })
+
+  await es.indices.refresh({ index })
+
+  const { body } = await es.search({
+    index,
+    body: {
+      query: {
+        match: { body: 'hoge' }
+      }
+    }
+  });
+
+  return callback(null, body.hits.hits);
 }

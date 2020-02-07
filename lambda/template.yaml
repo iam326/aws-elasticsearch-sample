@@ -7,6 +7,8 @@ Parameters:
     Default: aws-elasticsearch-sample
   BucketName:
     Type: String
+  ElasticsearchEndpoint:
+    Type: String
 
 Resources:
   LambdaExecutionRole:
@@ -57,6 +59,10 @@ Resources:
       MemorySize: 256
       Layers:
         - !Ref LambdaLayer
+      Environment:
+        Variables:
+          ENV_NAME: aws
+          ES_ENDPOINT: !Ref ElasticsearchEndpoint
 
 Outputs:
   LambdaExecutionRoleArn:

@@ -5,10 +5,13 @@
   "repository": "https://github.com/iam326/aws-elasticsearch-sample.git",
   "author": "t.takahashi <takahashi.developer@gmail.com>",
   "license": "MIT",
+  "scripts": {
+  },
   "devDependencies": {
     "@types/elasticsearch": "^5.0.36",
     "@types/node": "^13.1.7",
     "aws-sdk": "2.488.0",
+    "lambda-local": "^1.7.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   },
