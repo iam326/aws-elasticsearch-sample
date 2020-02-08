@@ -21,6 +21,9 @@ function connectElasticsearch() {
 }
 
 exports.handler = async (event: any, context: any, callback: Function) => {
+  console.log(event.Records[0].dynamodb.NewImage);
+  return callback(null, 'ok');
+  /*
   const es = connectElasticsearch();
   const index = 'todo';
 
@@ -68,4 +71,5 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   });
 
   return callback(null, body.hits.hits);
+  */
 }

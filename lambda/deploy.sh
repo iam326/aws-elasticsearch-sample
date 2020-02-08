@@ -6,6 +6,7 @@ readonly PROJECT_NAME="aws-elasticsearch-sample"
 readonly STACK_NAME="${PROJECT_NAME}-lambda"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
 readonly BUCKET_NAME="iam326.${PROJECT_NAME}"
+readonly TABLE_NAME="${PROJECT_NAME}-table"
 
 ES_ENDPOINT=$(aws cloudformation describe-stacks \
   --stack-name "${PROJECT_NAME}-es" \
@@ -44,6 +45,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     BucketName=${BUCKET_NAME} \
+    TableName=${TABLE_NAME} \
     LayerVersion=${LAYER_VERSION} \
     ElasticsearchEndpoint="https://"${ES_ENDPOINT}
 
