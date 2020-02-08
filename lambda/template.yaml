@@ -46,12 +46,12 @@ Resources:
       Description: sample lambda layer
       LayerName: ElasticsearchSampleLambdaLayer
 
-  LambdaFunction:
+  InsertDataIntoESLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      Description: operate Elasticsearch
-      FunctionName: ElasticsearchSampleLambdaFunction
-      Handler: index.handler
+      Description: Lambda triggered by DynamoDB Streams
+      FunctionName: InsertDataIntoESLambdaFunction
+      Handler: insert_es.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs10.x
       Code: src/dist/
