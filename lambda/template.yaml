@@ -7,6 +7,8 @@ Parameters:
     Default: aws-elasticsearch-sample
   BucketName:
     Type: String
+  LayerVersion:
+    Type: String
   ElasticsearchEndpoint:
     Type: String
 
@@ -43,6 +45,7 @@ Resources:
       Content: 
         S3Bucket: !Ref BucketName
         S3Key: layer.zip
+        S3ObjectVersion: !Ref LayerVersion
       Description: sample lambda layer
       LayerName: ElasticsearchSampleLambdaLayer
 

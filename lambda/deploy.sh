@@ -23,6 +23,13 @@ zip -r layer.zip ./nodejs
 aws s3 cp ./layer.zip "s3://${BUCKET_NAME}"
 rm layer.zip
 
+LAYER_VERSION=$(aws s3api head-object \
+  --bucket ${BUCKET_NAME} \
+  --key layer.zip \
+  --query VersionId \
+  --output text \
+)
+
 aws cloudformation validate-template \
   --template-body "file://${TEMPLATE_FILE}"
 
@@ -37,6 +44,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     BucketName=${BUCKET_NAME} \
+    LayerVersion=${LAYER_VERSION} \
     ElasticsearchEndpoint="https://"${ES_ENDPOINT}
 
 rm packaged-template.yml
