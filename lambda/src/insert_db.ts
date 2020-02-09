@@ -1,13 +1,9 @@
 'use strict';
 
-import AWS from 'aws-sdk';
 import uuid from 'node-uuid';
+import { getDynamoDocClient } from './utils';
 
-AWS.config.update({region: 'ap-northeast-1'});
-
-const docClient = new AWS.DynamoDB.DocumentClient(
-  { region: 'ap-northeast-1' }
-);
+const docClient = getDynamoDocClient();
 
 exports.handler = async (event: any, context: any, callback: Function) => {
   const tableName = process.env.TABLE_NAME;
