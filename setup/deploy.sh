@@ -15,4 +15,5 @@ aws cloudformation deploy \
   --template-file ${TEMPLATE_FILE} \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
+    NamePrefix=${PROJECT_NAME} \
     BucketName=${BUCKET_NAME}

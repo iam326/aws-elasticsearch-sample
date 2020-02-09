@@ -29,38 +29,6 @@ Resources:
       StreamSpecification:
         StreamViewType: NEW_IMAGE
 
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service:
-                - 'lambda.amazonaws.com'
-            Action:
-              - 'sts:AssumeRole'
-      Path: '/'
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-            - Effect: Allow
-              Action:
-                - 'cloudformation:*'
-                - 'es:*'
-                - 'dynamodb:DescribeStream'
-                - 'dynamodb:GetShardIterator'
-                - 'dynamodb:GetRecords'
-                - 'dynamodb:ListStreams'
-                - 'dynamodb:PutItem'
-                - 'logs:CreateLogGruop'
-                - 'logs:CreateLogStream'
-                - 'logs:PutLogEvents'
-              Resource: '*'
-
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -79,7 +47,8 @@ Resources:
       Description: Insert data into dynamodb
       FunctionName: InsertDataIntoDBLambdaFunction
       Handler: insert_db.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
       Runtime: nodejs10.x
       Code: src/dist/
       Timeout: 30
@@ -103,7 +72,8 @@ Resources:
       Description: Lambda triggered by DynamoDB Streams
       FunctionName: InsertDataIntoESLambdaFunction
       Handler: insert_es.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
       Runtime: nodejs10.x
       Code: src/dist/
       Timeout: 30
@@ -136,7 +106,8 @@ Resources:
       Description: Search data from ES
       FunctionName: SearchDataFromESLambdaFunction
       Handler: search_es.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
       Runtime: nodejs10.x
       Code: src/dist/
       Timeout: 30
@@ -154,9 +125,3 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${SearchDataFromESLambdaFunction}'
       RetentionInDays: 7
-
-Outputs:
-  LambdaExecutionRoleArn:
-    Value: !GetAtt LambdaExecutionRole.Arn
-    Export:
-      Name: !Sub '${NamePrefix}-lambda-role-arn'
