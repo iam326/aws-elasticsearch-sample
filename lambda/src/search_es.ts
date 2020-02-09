@@ -31,12 +31,14 @@ exports.handler = async (event: any, context: any, callback: Function) => {
     return;
   }
 
-  const body = event.Records[0].dynamodb.NewImage;
-  const result = await es.index({
+  const { body } = await es.search({
     index,
-    body
-  })
-  await es.indices.refresh({ index })
+    body: {
+      query: {
+        match: { body: 'hoge' }
+      }
+    }
+  });
 
-  return callback(null, result);
+  return callback(null, body.hits.hits);
 }

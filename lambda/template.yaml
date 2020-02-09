@@ -114,6 +114,7 @@ Resources:
         Variables:
           ENV_NAME: aws
           ES_ENDPOINT: !Ref ElasticsearchEndpoint
+          ES_INDEX: todo
 
   InsertDataIntoESLambdaFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -128,6 +129,31 @@ Resources:
       EventSourceArn: !GetAtt TodoDynamoDBTable.StreamArn
       FunctionName: !Ref InsertDataIntoESLambdaFunction
       StartingPosition: LATEST
+
+  SearchDataFromESLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Search data from ES
+      FunctionName: SearchDataFromESLambdaFunction
+      Handler: search_es.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: nodejs10.x
+      Code: src/dist/
+      Timeout: 30
+      MemorySize: 256
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          ENV_NAME: aws
+          ES_ENDPOINT: !Ref ElasticsearchEndpoint
+          ES_INDEX: todo
+
+  SearchDataFromESLambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${SearchDataFromESLambdaFunction}'
+      RetentionInDays: 7
 
 Outputs:
   LambdaExecutionRoleArn:
