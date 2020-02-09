@@ -21,55 +21,19 @@ function connectElasticsearch() {
 }
 
 exports.handler = async (event: any, context: any, callback: Function) => {
-  console.log(event.Records[0].dynamodb.NewImage);
-  return callback(null, 'ok');
-  /*
   const es = connectElasticsearch();
   const index = 'todo';
-
-  const result = await es.cat.indices();
-  console.log(result.body);
-
   const exists = await es.indices.exists({ index })
-  if (exists.body) {
-    await es.indices.delete({ index });
+  if (!exists.body) {
+    return;
   }
 
-  await es.index({
+  const body = event.Records[0].dynamodb.NewImage;
+  const result = await es.index({
     index,
-    body: {
-      title: 'Sample Title 1',
-      body: 'hoge fuga'
-    }
+    body
   })
-
-  await es.index({
-    index,
-    body: {
-      title: 'Sample Title 2',
-      body: 'foo bar'
-    }
-  })
-
-  await es.index({
-    index,
-    body: {
-      title: 'Sample Title 3',
-      body: 'hoge foo bar'
-    }
-  })
-
   await es.indices.refresh({ index })
 
-  const { body } = await es.search({
-    index,
-    body: {
-      query: {
-        match: { body: 'hoge' }
-      }
-    }
-  });
-
-  return callback(null, body.hits.hits);
-  */
+  return callback(null, result);
 }
