@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-readonly PROJECT_NAME="aws-elasticsearch-sample"
+source ../config.sh
+
 readonly STACK_NAME="${PROJECT_NAME}-lambda"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
-readonly BUCKET_NAME="iam326.${PROJECT_NAME}"
 readonly TABLE_NAME="${PROJECT_NAME}-table"
 
 ES_ENDPOINT=$(aws cloudformation describe-stacks \
@@ -47,6 +47,9 @@ aws cloudformation deploy \
     BucketName=${BUCKET_NAME} \
     TableName=${TABLE_NAME} \
     LayerVersion=${LAYER_VERSION} \
+    InsertDBFunctionName=${INSERT_DB_FUNCTION} \
+    InsertESFunctionName=${INSERT_ES_FUNCTION} \
+    SearchESFunctionName=${SEARCH_ES_FUNCTION} \
     ElasticsearchEndpoint="https://"${ES_ENDPOINT}
 
 rm packaged-template.yml

@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-readonly PROJECT_NAME="aws-elasticsearch-sample"
+source ./config.sh
+
 readonly STACK_NAME="${PROJECT_NAME}-es"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
 

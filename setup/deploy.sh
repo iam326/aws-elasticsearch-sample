@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-readonly PROJECT_NAME="aws-elasticsearch-sample"
+source ../config.sh
+
 readonly STACK_NAME="${PROJECT_NAME}-setup"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
-readonly BUCKET_NAME="iam326.${PROJECT_NAME}"
 
 aws cloudformation validate-template \
   --template-body "file://${TEMPLATE_FILE}"

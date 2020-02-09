@@ -11,6 +11,12 @@ Parameters:
     Type: String
   LayerVersion:
     Type: String
+  InsertDBFunctionName:
+    Type: String
+  InsertESFunctionName:
+    Type: String
+  SearchESFunctionName:
+    Type: String
   ElasticsearchEndpoint:
     Type: String
 
@@ -45,7 +51,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: Insert data into dynamodb
-      FunctionName: InsertDataIntoDBLambdaFunction
+      FunctionName: !Ref InsertDBFunctionName
       Handler: insert_db.handler
       Role:
         Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
@@ -70,7 +76,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: Lambda triggered by DynamoDB Streams
-      FunctionName: InsertDataIntoESLambdaFunction
+      FunctionName: !Ref InsertESFunctionName
       Handler: insert_es.handler
       Role:
         Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
@@ -104,7 +110,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: Search data from ES
-      FunctionName: SearchDataFromESLambdaFunction
+      FunctionName: !Ref SearchESFunctionName
       Handler: search_es.handler
       Role:
         Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
