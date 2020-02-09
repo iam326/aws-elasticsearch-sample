@@ -8,17 +8,15 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   if (!index) {
     return;
   }
-  const exists = await es.indices.exists({ index })
-  if (!exists.body) {
-    return;
-  }
 
-  const body = event.Records[0].dynamodb.NewImage;
+  const data = event.Records[0].dynamodb.NewImage;
+  const body: any = {};
+  Object.keys(data).forEach(k => body[k] = Object.values(data[k])[0]);
   const result = await es.index({
     index,
-    body
-  })
-  await es.indices.refresh({ index })
+    body,
+    refresh: 'true'
+  });
 
   return callback(null, result);
 }

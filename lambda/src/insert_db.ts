@@ -14,7 +14,7 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   const item = {
     id: uuid.v4(),
     title: 'SAMPLE 1',
-    body: 'hogehoge'
+    body: 'hoge foo bar'
   }
 
   const params = {
