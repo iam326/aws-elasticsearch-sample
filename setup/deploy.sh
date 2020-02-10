@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-source ./config.sh
+source ../config.sh
 
-readonly STACK_NAME="${PROJECT_NAME}-es"
+readonly STACK_NAME="${PROJECT_NAME}-setup"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
 
 aws cloudformation validate-template \
@@ -13,4 +13,7 @@ aws cloudformation validate-template \
 aws cloudformation deploy \
   --stack-name ${STACK_NAME} \
   --template-file ${TEMPLATE_FILE} \
-  --capabilities CAPABILITY_NAMED_IAM
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides \
+    NamePrefix=${PROJECT_NAME} \
+    BucketName=${BUCKET_NAME}

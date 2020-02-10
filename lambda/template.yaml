@@ -7,33 +7,33 @@ Parameters:
     Default: aws-elasticsearch-sample
   BucketName:
     Type: String
+  TableName:
+    Type: String
+  LayerVersion:
+    Type: String
+  InsertDBFunctionName:
+    Type: String
+  InsertESFunctionName:
+    Type: String
+  SearchESFunctionName:
+    Type: String
   ElasticsearchEndpoint:
     Type: String
 
 Resources:
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
+  TodoDynamoDBTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service:
-                - 'lambda.amazonaws.com'
-            Action:
-              - 'sts:AssumeRole'
-      Path: '/'
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-            - Effect: Allow
-              Action:
-                - 'cloudformation:*'
-                - 'es:*'
-              Resource: '*'
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
 
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
@@ -43,16 +43,43 @@ Resources:
       Content: 
         S3Bucket: !Ref BucketName
         S3Key: layer.zip
+        S3ObjectVersion: !Ref LayerVersion
       Description: sample lambda layer
       LayerName: ElasticsearchSampleLambdaLayer
 
-  LambdaFunction:
+  InsertDataIntoDBLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      Description: operate Elasticsearch
-      FunctionName: ElasticsearchSampleLambdaFunction
-      Handler: index.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Description: Insert data into dynamodb
+      FunctionName: !Ref InsertDBFunctionName
+      Handler: insert_db.handler
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
+      Runtime: nodejs10.x
+      Code: src/dist/
+      Timeout: 30
+      MemorySize: 256
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          ENV_NAME: aws
+          TABLE_NAME: !Ref TableName
+
+  InsertDataIntoDBLambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${InsertDataIntoDBLambdaFunction}'
+      RetentionInDays: 7
+
+  InsertDataIntoESLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda triggered by DynamoDB Streams
+      FunctionName: !Ref InsertESFunctionName
+      Handler: insert_es.handler
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
       Runtime: nodejs10.x
       Code: src/dist/
       Timeout: 30
@@ -63,9 +90,44 @@ Resources:
         Variables:
           ENV_NAME: aws
           ES_ENDPOINT: !Ref ElasticsearchEndpoint
+          ES_INDEX: todo
 
-Outputs:
-  LambdaExecutionRoleArn:
-    Value: !GetAtt LambdaExecutionRole.Arn
-    Export:
-      Name: !Sub '${NamePrefix}-lambda-role-arn'
+  InsertDataIntoESLambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${InsertDataIntoESLambdaFunction}'
+      RetentionInDays: 7
+
+  LambdaEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 100
+      EventSourceArn: !GetAtt TodoDynamoDBTable.StreamArn
+      FunctionName: !Ref InsertDataIntoESLambdaFunction
+      StartingPosition: LATEST
+
+  SearchDataFromESLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Search data from ES
+      FunctionName: !Ref SearchESFunctionName
+      Handler: search_es.handler
+      Role:
+        Fn::ImportValue: !Sub '${NamePrefix}-lambda-role-arn'
+      Runtime: nodejs10.x
+      Code: src/dist/
+      Timeout: 30
+      MemorySize: 256
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          ENV_NAME: aws
+          ES_ENDPOINT: !Ref ElasticsearchEndpoint
+          ES_INDEX: todo
+
+  SearchDataFromESLambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${SearchDataFromESLambdaFunction}'
+      RetentionInDays: 7

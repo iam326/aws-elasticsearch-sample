@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-readonly PROJECT_NAME="aws-elasticsearch-sample"
+source ../config.sh
+
 readonly STACK_NAME="${PROJECT_NAME}-lambda"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
-readonly BUCKET_NAME="iam326.${PROJECT_NAME}"
+readonly TABLE_NAME="${PROJECT_NAME}-table"
 
 ES_ENDPOINT=$(aws cloudformation describe-stacks \
   --stack-name "${PROJECT_NAME}-es" \
@@ -23,6 +24,13 @@ zip -r layer.zip ./nodejs
 aws s3 cp ./layer.zip "s3://${BUCKET_NAME}"
 rm layer.zip
 
+LAYER_VERSION=$(aws s3api head-object \
+  --bucket ${BUCKET_NAME} \
+  --key layer.zip \
+  --query VersionId \
+  --output text \
+)
+
 aws cloudformation validate-template \
   --template-body "file://${TEMPLATE_FILE}"
 
@@ -37,6 +45,11 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     BucketName=${BUCKET_NAME} \
+    TableName=${TABLE_NAME} \
+    LayerVersion=${LAYER_VERSION} \
+    InsertDBFunctionName=${INSERT_DB_FUNCTION} \
+    InsertESFunctionName=${INSERT_ES_FUNCTION} \
+    SearchESFunctionName=${SEARCH_ES_FUNCTION} \
     ElasticsearchEndpoint="https://"${ES_ENDPOINT}
 
 rm packaged-template.yml
