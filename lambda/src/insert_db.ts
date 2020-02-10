@@ -6,6 +6,11 @@ import { getDynamoDocClient } from './utils';
 const docClient = getDynamoDocClient();
 
 exports.handler = async (event: any, context: any, callback: Function) => {
+  const { title, body } = event;
+  if (!title || !body) {
+    return;
+  }
+
   const tableName = process.env.TABLE_NAME;
   if (!tableName) { 
     return;
@@ -13,8 +18,8 @@ exports.handler = async (event: any, context: any, callback: Function) => {
 
   const item = {
     id: uuid.v4(),
-    title: 'SAMPLE 1',
-    body: 'hoge foo bar'
+    title,
+    body
   }
 
   const params = {
