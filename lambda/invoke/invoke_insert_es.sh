@@ -9,19 +9,23 @@ TITLE=""
 BODY=""
 ENV_NAME=""
 
-while getopts t:b:e: OPT
+display_usage() {
+  echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY] [-e ENV_NAME] [-h]" 1>&2
+}
+
+while getopts t:b:e:h OPT
 do
   case ${OPT} in
-    "t" ) TITLE="${OPTARG}" ;;
-    "b" ) BODY="${OPTARG}" ;;
-    "e" ) ENV_NAME="${OPTARG}" ;;
-      * ) echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY] [-e ENV_NAME]" 1>&2
-          exit 1 ;;
+    "t"     ) TITLE="${OPTARG}" ;;
+    "b"     ) BODY="${OPTARG}" ;;
+    "e"     ) ENV_NAME="${OPTARG}" ;;
+    "h" | * ) display_usage
+              exit 1 ;;
   esac
 done
 
 if [ -z "${TITLE}" -o -z "${BODY}" ]; then
-  echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY] [-e ENV_NAME]" 1>&2
+  display_usage
   exit 1
 fi
 

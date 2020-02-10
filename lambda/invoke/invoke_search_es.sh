@@ -8,18 +8,22 @@ CMDNAME=`basename $0`
 BODY=""
 ENV_NAME=""
 
-while getopts b:e: OPT
+display_usage() {
+  echo "Usage: ${CMDNAME} [-b BODY] [-h]" 1>&2
+}
+
+while getopts b:e:h OPT
 do
   case ${OPT} in
-    "b" ) BODY="${OPTARG}" ;;
-    "e" ) ENV_NAME="${OPTARG}" ;;
-      * ) echo "Usage: ${CMDNAME} [-b BODY] [-e ENV_NAME]" 1>&2
-          exit 1 ;;
+    "b"     ) BODY="${OPTARG}" ;;
+    "e"     ) ENV_NAME="${OPTARG}" ;;
+    "h" | * ) display_usage
+              exit 1 ;;
   esac
 done
 
 if [ -z "${BODY}" ]; then
-  echo "Usage: ${CMDNAME} [-b BODY] [-e ENV_NAME]" 1>&2
+  display_usage
   exit 1
 fi
 

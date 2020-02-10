@@ -8,18 +8,22 @@ CMDNAME=`basename $0`
 TITLE=""
 BODY=""
 
-while getopts t:b: OPT
+display_usage() {
+  echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY] [-h]" 1>&2
+}
+
+while getopts t:b:h OPT
 do
   case ${OPT} in
-    "t" ) TITLE="${OPTARG}" ;;
-    "b" ) BODY="${OPTARG}" ;;
-      * ) echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY]" 1>&2
-          exit 1 ;;
+    "t"     ) TITLE="${OPTARG}" ;;
+    "b"     ) BODY="${OPTARG}" ;;
+    "h" | * ) display_usage
+              exit 1 ;;
   esac
 done
 
 if [ -z "${TITLE}" -o -z "${BODY}" ]; then
-  echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY]" 1>&2
+  display_usage
   exit 1
 fi
 
