@@ -10,6 +10,10 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   }
 
   const data = event.Records[0].dynamodb.NewImage;
+  if (!data || !data.title || !data.body) {
+    return;
+  }
+
   const body: any = {};
   Object.keys(data).forEach(k => body[k] = Object.values(data[k])[0]);
   const result = await es.index({
