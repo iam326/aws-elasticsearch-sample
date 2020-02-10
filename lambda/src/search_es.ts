@@ -3,6 +3,10 @@
 import { connectElasticsearch } from './utils';
 
 exports.handler = async (event: any, context: any, callback: Function) => {
+  if (!event.body) {
+    return;
+  }
+
   const es = connectElasticsearch();
   const index = process.env.ES_INDEX;
   if (!index) {
@@ -17,7 +21,7 @@ exports.handler = async (event: any, context: any, callback: Function) => {
     index,
     body: {
       query: {
-        match: { body: 'hoge' }
+        match: { body: event.body }
       }
     }
   });
