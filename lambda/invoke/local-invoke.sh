@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cd ./src
+cd ../src
 npx tsc
 
 npx lambda-local \
