@@ -11,10 +11,13 @@ services:
     environment:
       - discovery.type=single-node
   dynamodb:
-    image: amazon/dynamodb-local:1.12.0
+    build: ./dynamodb
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
     ports:
       - '8000:8000'
-    command: -jar DynamoDBLocal.jar -inMemory -sharedDb
+    command: -jar DynamoDBLocal.jar -dbPath ./data -sharedDb
 volumes:
   es-data:
     driver: local
+  dynamodb-data:
