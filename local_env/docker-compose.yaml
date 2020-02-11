@@ -10,6 +10,11 @@ services:
       - es-data:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
+  dynamodb:
+    image: amazon/dynamodb-local:1.12.0
+    ports:
+      - '8000:8000'
+    command: -jar DynamoDBLocal.jar -inMemory -sharedDb
 volumes:
   es-data:
     driver: local
