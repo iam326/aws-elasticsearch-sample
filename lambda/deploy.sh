@@ -45,6 +45,7 @@ aws cloudformation deploy \
   --parameter-overrides \
     BucketName=${BUCKET_NAME} \
     TableName=${TABLE_NAME} \
+    IndexName=${INDEX_NAME} \
     LayerVersion=${LAYER_VERSION} \
     InsertDBFunctionName=${INSERT_DB_FUNCTION} \
     InsertESFunctionName=${INSERT_ES_FUNCTION} \

@@ -36,7 +36,7 @@ ENVIRONMENT=$(cat << EOS | jq -c '.'
 {
   "ENV_NAME": "local",
   "ES_ENDPOINT": "http://localhost:9200",
-  "ES_INDEX": "index"
+  "ES_INDEX": "${INDEX_NAME}"
 }
 EOS
 )

@@ -9,6 +9,8 @@ Parameters:
     Type: String
   TableName:
     Type: String
+  IndexName:
+    Type: String
   LayerVersion:
     Type: String
   InsertDBFunctionName:
@@ -90,7 +92,7 @@ Resources:
         Variables:
           ENV_NAME: aws
           ES_ENDPOINT: !Ref ElasticsearchEndpoint
-          ES_INDEX: todo
+          ES_INDEX: !Ref IndexName
 
   InsertDataIntoESLambdaFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -124,7 +126,7 @@ Resources:
         Variables:
           ENV_NAME: aws
           ES_ENDPOINT: !Ref ElasticsearchEndpoint
-          ES_INDEX: todo
+          ES_INDEX: !Ref IndexName
 
   SearchDataFromESLambdaFunctionLogGroup:
     Type: AWS::Logs::LogGroup
