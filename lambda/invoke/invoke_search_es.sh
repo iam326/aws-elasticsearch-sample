@@ -27,7 +27,19 @@ if [ -z "${BODY}" ]; then
   exit 1
 fi
 
-PAYLOAD="{ \"body\": \"${BODY}\" }"
+PAYLOAD=$(cat << EOS
+{ "body": "${BODY}" }
+EOS
+)
+
+ENVIRONMENT=$(cat << EOS | jq -c '.'
+{
+  "ENV_NAME": "local",
+  "ES_ENDPOINT": "${${LOCAL_ES_ENDPOINT}}",
+  "ES_INDEX": "${INDEX_NAME}"
+}
+EOS
+)
 
 if [ "${ENV_NAME}" = "local" ]; then
   cd ../src
@@ -37,7 +49,7 @@ if [ "${ENV_NAME}" = "local" ]; then
     -l ./dist/search_es.js \
     -h handler \
     -e ./events/_event.json \
-    -E '{"ES_ENDPOINT":"http://localhost:9200","ENV_NAME":"local","ES_INDEX":"index"}'
+    -E ${ENVIRONMENT}
 else
   aws lambda invoke \
       --function-name ${SEARCH_ES_FUNCTION} \

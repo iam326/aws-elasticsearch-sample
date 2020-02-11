@@ -8,11 +8,13 @@ const docClient = getDynamoDocClient();
 exports.handler = async (event: any, context: any, callback: Function) => {
   const { title, body } = event;
   if (!title || !body) {
+    console.warn('title or body is not found.');
     return;
   }
 
   const tableName = process.env.TABLE_NAME;
   if (!tableName) { 
+    console.warn('TABLE_NAME is not defined.');
     return;
   }
 
@@ -30,7 +32,7 @@ exports.handler = async (event: any, context: any, callback: Function) => {
   try {
     await docClient.put(params).promise();
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return;
   }
 

@@ -6,7 +6,6 @@ source ../config.sh
 
 readonly STACK_NAME="${PROJECT_NAME}-lambda"
 readonly TEMPLATE_FILE="$(pwd)/template.yaml"
-readonly TABLE_NAME="${PROJECT_NAME}-table"
 
 ES_ENDPOINT=$(aws cloudformation describe-stacks \
   --stack-name "${PROJECT_NAME}-es" \
@@ -46,6 +45,7 @@ aws cloudformation deploy \
   --parameter-overrides \
     BucketName=${BUCKET_NAME} \
     TableName=${TABLE_NAME} \
+    IndexName=${INDEX_NAME} \
     LayerVersion=${LAYER_VERSION} \
     InsertDBFunctionName=${INSERT_DB_FUNCTION} \
     InsertESFunctionName=${INSERT_ES_FUNCTION} \
