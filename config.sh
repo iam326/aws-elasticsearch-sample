@@ -10,3 +10,4 @@ readonly INSERT_DB_FUNCTION="InsertDataIntoDBLambdaFunction"
 readonly INSERT_ES_FUNCTION="InsertDataIntoESLambdaFunction"
 readonly SEARCH_ES_FUNCTION="SearchDataFromESLambdaFunction"
 readonly LOCAL_DYNAMODB_ENDPOINT=http://localhost:8000
+readonly LOCAL_ES_ENDPOINT=http://localhost:9200

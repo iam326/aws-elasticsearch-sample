@@ -35,7 +35,7 @@ EOS
 ENVIRONMENT=$(cat << EOS | jq -c '.'
 {
   "ENV_NAME": "local",
-  "DB_ENDPOINT": "http://localhost:8000",
+  "DB_ENDPOINT": "${LOCAL_DYNAMODB_ENDPOINT}",
   "TABLE_NAME": "${TABLE_NAME}"
 }
 EOS
