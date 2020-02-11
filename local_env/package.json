@@ -1,0 +1,12 @@
+{
+  "name": "local_env",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dynamodb": "dynamodb-admin"
+  },
+  "devDependencies": {
+    "dynamodb-admin": "^4.0.0"
+  }
+}
