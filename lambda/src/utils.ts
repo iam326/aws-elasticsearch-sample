@@ -7,9 +7,19 @@ const AmazonConnection = require('aws-elasticsearch-connector').AmazonConnection
 AWS.config.update({region: 'ap-northeast-1'});
 
 export function getDynamoDocClient() {
-  return new AWS.DynamoDB.DocumentClient(
-    { region: 'ap-northeast-1' }
-  );
+  const env_name = process.env.ENV_NAME;
+  if (!env_name) {
+    throw 'error';
+  }
+  const params: any = { region: 'ap-northeast-1' };
+  if (env_name === 'local') {
+    const endpoint = process.env.DB_ENDPOINT;
+    if (!endpoint) {
+      throw 'error';
+    }
+    params.endpoint = endpoint;
+  }
+  return new AWS.DynamoDB.DocumentClient(params);
 }
 
 export function connectElasticsearch() {
