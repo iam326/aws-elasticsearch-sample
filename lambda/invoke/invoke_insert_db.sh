@@ -22,6 +22,14 @@ do
   esac
 done
 
+PAYLOAD=$(cat << EOS
+{
+  "title": "${TITLE}",
+  "body": "${BODY}"
+}
+EOS
+)
+
 if [ -z "${TITLE}" -o -z "${BODY}" ]; then
   display_usage
   exit 1
@@ -29,5 +37,5 @@ fi
 
 aws lambda invoke \
     --function-name ${INSERT_DB_FUNCTION} \
-    --payload "{ \"title\": \"${TITLE}\", \"body\": \"${BODY}\" }" \
+    --payload ${PAYLOAD} \
     response.json

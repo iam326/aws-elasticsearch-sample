@@ -29,7 +29,28 @@ if [ -z "${TITLE}" -o -z "${BODY}" ]; then
   exit 1
 fi
 
-PAYLOAD="{\"Records\":[{\"dynamodb\":{\"NewImage\":{\"title\":{\"S\":\"${TITLE}\"},\"body\":{\"S\":\"${BODY}\"}}}}]}"
+PAYLOAD=$(cat << EOS
+{
+  "Records": [{
+    "dynamodb": {
+      "NewImage": {
+        "title": { "S": "${TITLE}" },
+        "body": { "S": "${BODY}"}
+      }
+    }
+  }]
+}
+EOS
+)
+
+ENVIRONMENT=$(cat << EOS | jq -c '.'
+{
+  "ENV_NAME": "local",
+  "ES_ENDPOINT": "http://localhost:9200",
+  "ES_INDEX": "index"
+}
+EOS
+)
 
 if [ "${ENV_NAME}" = "local" ]; then
   cd ../src
@@ -39,7 +60,7 @@ if [ "${ENV_NAME}" = "local" ]; then
     -l ./dist/insert_es.js \
     -h handler \
     -e ./events/_event.json \
-    -E '{"ES_ENDPOINT":"http://localhost:9200","ENV_NAME":"local","ES_INDEX":"index"}'
+    -E ${ENVIRONMENT}
 else
   aws lambda invoke \
       --function-name ${INSERT_ES_FUNCTION} \
