@@ -1,8 +1,8 @@
 'use strict';
 
 import AWS from 'aws-sdk';
-const path = require('path');
-const lambdaLocal = require('lambda-local');
+import path from 'path';
+import { execute } from 'lambda-local';
 
 process.env.ENV_NAME = 'local';
 process.env.ES_ENDPOINT = 'http://localhost:9200';
@@ -33,9 +33,7 @@ async function getLatestStreamArn(tableName: string) {
 
 async function main() {
   const arn = await getLatestStreamArn('aws-elasticsearch-sample-table');
-  if (!arn) {
-    return;
-  }
+  if (!arn) { return; }
 
   const stream = await streams.describeStream({StreamArn: arn}).promise();
   if (!stream.StreamDescription || !stream.StreamDescription.Shards) {
@@ -72,7 +70,7 @@ async function main() {
         }
 
         try {
-          const result = await lambdaLocal.execute({
+          const result = await execute({
             event: records,
             lambdaPath: path.join(__dirname, './dist/insert_es.js'),
             timeoutMs: 3000
