@@ -7,7 +7,7 @@ source ../../config.sh
 CMDNAME=`basename $0`
 TITLE=""
 BODY=""
-ENDPOINT=""
+ENV_NAME=""
 
 display_usage() {
   echo "Usage: ${CMDNAME} [-t TITLE] [-b BODY] [-e ENV_NAME] [-h]" 1>&2

@@ -1,6 +1,12 @@
 'use strict';
 
 import AWS from 'aws-sdk';
+const path = require('path');
+const lambdaLocal = require('lambda-local');
+
+process.env.ENV_NAME = 'local';
+process.env.ES_ENDPOINT = 'http://localhost:9200';
+process.env.ES_INDEX = 'todo';
 
 AWS.config.update({region: 'ap-northeast-1'});
 
@@ -64,7 +70,18 @@ async function main() {
         if (iters[id] === shard || records.Records?.length === 0) {
           continue;
         }
-        console.log(records);
+
+        try {
+          const result = await lambdaLocal.execute({
+            event: records,
+            lambdaPath: path.join(__dirname, './dist/insert_es.js'),
+            timeoutMs: 3000
+          });
+          console.log(result);
+        } catch (e) {
+          console.warn(e);
+        }
+
       }
     } catch (e) {
       console.warn(e);
