@@ -8,6 +8,10 @@ process.env.ES_ENDPOINT = 'http://localhost:9200';
 const es = connectElasticsearch();
 const index = 'sample';
 
+function displaySearchResults(result: any[], key: string) {
+  console.info(result.map((e: any) => e._source[key]).toString());
+}
+
 async function main() {
   let result, body;
 
@@ -56,8 +60,7 @@ async function main() {
   });
 
   console.info('<match all>');
-  console.info('total:', result.body.hits.total.value);
-  console.info(result.body.hits.hits.map((e: any) => e._source.name).toString());
+  displaySearchResults(result.body.hits.hits, 'name');
 
   result = await es.search({
     index,
@@ -72,8 +75,7 @@ async function main() {
   });
 
   console.info('<match>');
-  console.info('total:', result.body.hits.total.value);
-  console.info(result.body.hits.hits.map((e: any) => e._source.name).toString());
+  displaySearchResults(result.body.hits.hits, 'name');
 
 }
 
