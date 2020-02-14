@@ -189,6 +189,23 @@ async function main() {
     console.info('<sum age>');
     console.log(result.body.aggregations.sum_age.value);
 
+    result = await es.sql.query({
+      body: {
+        query: `SELECT name, sex FROM ${index} WHERE name='takahashi'`
+      }
+    });
+
+    console.info('<sql select 1>');
+    console.log(result.body.rows);
+
+    result = await es.sql.query({
+      body: {
+        query: `SELECT name, COUNT(name) AS count FROM ${index} GROUP BY name ORDER BY count DESC`
+      }
+    });
+    console.info('<sql select 2>');
+    console.log(result.body.rows);
+
   } catch (e) {
     console.error(e.name, e.body.error);
   }
