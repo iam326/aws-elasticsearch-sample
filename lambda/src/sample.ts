@@ -8,8 +8,12 @@ process.env.ES_ENDPOINT = 'http://localhost:9200';
 const es = connectElasticsearch();
 const index = 'sample';
 
-function displaySearchResults(result: any[], key: string) {
-  console.info(result.map((e: any) => e._source[key]).toString());
+function displaySearchResults(result: any[]) {
+  console.info(
+    result.map(
+      (e: any) => Object.values(e._source).join(' ')
+    ).join(', ')
+  );
 }
 
 async function main() {
@@ -43,6 +47,16 @@ async function main() {
       name: 'tanaka',
       sex: 'woman',
       age: 28
+    },
+    {
+      name: 'takahashi',
+      sex: 'woman',
+      age: 41
+    },
+    {
+      name: 'tomura',
+      sex: 'man',
+      age: 68
     }
   ];
 
@@ -54,28 +68,130 @@ async function main() {
 
   await es.indices.refresh({ index });
 
-  result = await es.search({
-    index,
-    body: { query: { match_all: {} } }
-  });
+  try {
 
-  console.info('<match all>');
-  displaySearchResults(result.body.hits.hits, 'name');
+    result = await es.search({
+      index,
+      from: 0,
+      size: 3,
+      body: {
+        _source: [ 'name', 'age' ],
+        query: { match_all: {} },
+        sort: { age: { order: 'desc'} }
+      }
+    });
 
-  result = await es.search({
-    index,
-    body: { 
-      _source: [
-        'name',
-      ],
-      query: { 
-        match: { sex: 'man' }
-      } 
-    }
-  });
+    console.info('<match all>');
+    displaySearchResults(result.body.hits.hits);
 
-  console.info('<match>');
-  displaySearchResults(result.body.hits.hits, 'name');
+    result = await es.search({
+      index,
+      body: {
+        // collapse: { field: 'name' },
+        query: {
+          match: { sex: 'man' }
+        }
+      }
+    });
+
+    console.info('<match [man]>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        query: {
+          wildcard: { name: 'ta*' }
+        }
+      }
+    });
+
+    console.info('<wildcard [ta*]>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        query: {
+          range: {
+            age: { gte: 40 }
+          }
+        }
+      }
+    });
+
+    console.info('<range age >= 40>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        query: {
+          bool: {
+            must: [
+              { term: { name: 'takahashi' } },
+              { term: { sex: 'man' } }
+            ]
+          }
+        }
+      }
+    });
+
+    console.info('<bool must>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        query: {
+          bool: {
+            should: [
+              { term: { sex: 'woman' } },
+              { range: { age: { lt: 20 } } },
+            ]
+          }
+        }
+      }
+    });
+
+    console.info('<bool should>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        query: {
+          bool: {
+            must_not: [
+              { term: { name: 'takahashi' } }
+            ]
+          }
+        }
+      }
+    });
+
+    console.info('<bool must not>');
+    displaySearchResults(result.body.hits.hits);
+
+    result = await es.search({
+      index,
+      body: {
+        aggs: {
+          sum_age: {
+            sum: {
+              field: 'age'
+            }
+          }
+        }
+      }
+    });
+
+    console.info('<sum age>');
+    console.log(result.body.aggregations.sum_age.value);
+
+  } catch (e) {
+    console.error(e.name, e.body.error);
+  }
 
 }
 
